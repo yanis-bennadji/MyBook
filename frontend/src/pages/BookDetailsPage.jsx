@@ -124,15 +124,20 @@ const BookDetailsPage = () => {
   };
 
   const getHighQualityImageUrl = (url) => {
-    if (!url) return null;
-    // Remplacer http par https pour éviter les problèmes de sécurité
+    if (!url) return 'https://via.placeholder.com/128x192?text=Image+non+disponible';
+    
+    // Remplacer http par https
     let newUrl = url.replace('http://', 'https://');
-    // Remplacer zoom=1 par zoom=2 pour une meilleure qualité
-    newUrl = newUrl.replace('zoom=1', 'zoom=2');
-    // Supprimer edge=curl qui peut causer des problèmes
+    
+    // Remplacer thumbnail par une version plus grande
+    newUrl = newUrl.replace('zoom=1', 'zoom=3');
     newUrl = newUrl.replace('&edge=curl', '');
-    console.log('Image URL:', newUrl); // Pour déboguer
-    return newUrl;
+    
+    // Obtenir la meilleure qualité disponible
+    return newUrl
+      .replace('&fife=w200-h300', '')
+      .replace('&w=128', '&w=512')
+      .replace('&h=192', '&h=768');
   };
 
   useEffect(() => {
@@ -346,14 +351,15 @@ const BookDetailsPage = () => {
 
           <div className="bg-white rounded-xl shadow-lg overflow-hidden">
             <div className="md:flex">
-              <div className="md:w-1/3 p-8 flex justify-center">
+              <div className="md:w-2/5 p-8 flex justify-center items-start">
                 <img
-                  src={book.volumeInfo?.imageLinks?.thumbnail || 'https://via.placeholder.com/128x192?text=Image+non+disponible'}
+                  src={getHighQualityImageUrl(book.volumeInfo?.imageLinks?.thumbnail)}
                   alt={book.volumeInfo?.title}
-                  className="w-48 h-72 object-cover rounded-lg shadow-md"
+                  className="w-80 h-[30rem] object-contain rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
                 />
               </div>
-              <div className="p-8 md:w-2/3">
+              <div className="p-8 md:w-3/5">
                 <h1 className="text-3xl font-bold text-[#0F3D3E] mb-2">{book.volumeInfo?.title}</h1>
                 <p className="text-xl text-gray-600 mb-4">{book.volumeInfo?.authors?.join(', ')}</p>
                 {book.volumeInfo?.averageRating && (
