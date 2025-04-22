@@ -1,0 +1,87 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int            @id @default(autoincrement())
+  username         String
+  email            String         @unique
+  password         String
+  bio              String?
+  avatar_url       String?
+  isVerified       Boolean        @default(false)
+  verificationToken String?       @unique
+  createdAt        DateTime       @default(now())
+  reviews          Review[]
+  collections      Collection[]
+  favoriteBooks    FavoriteBook[]
+
+  @@map("users")
+}
+
+model Review {
+  id         Int         @id @default(autoincrement())
+  userId     Int
+  bookId     String
+  rating     Float
+  comment    String?
+  finishDate DateTime?
+  createdAt  DateTime    @default(now())
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  collection Collection  @relation(fields: [userId, bookId], references: [userId, bookId])
+
+  @@unique([userId, bookId])
+  @@map("reviews")
+}
+
+model Collection {
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  bookId     String
+  status     String
+  finishDate DateTime?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  review     Review?
+
+  @@unique([userId, bookId])
+  @@index([userId], map: "collections_userId_fkey")
+  @@map("collections")
+}
+
+model FavoriteBook {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  bookId    String
+  position  Int      // Position du livre (1-4)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, position]) // Un seul livre par position pour chaque utilisateur
+  @@unique([userId, bookId])   // Un livre ne peut être favori qu'une seule fois par utilisateur
+  @@map("favorite_books")
+}
+
+model Tag {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  bookTags BookTag[]
+
+  @@map("tags")
+}
+
+model BookTag {
+  id     Int    @id @default(autoincrement())
+  bookId String
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId  Int
+
+  @@map("book_tags")
+} 
