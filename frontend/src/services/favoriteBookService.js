@@ -5,7 +5,7 @@ const favoriteBookService = {
   // Récupérer tous les livres favoris
   getFavoriteBooks: async (userId = null) => {
     try {
-      const endpoint = userId ? `/favorite-books/users/${userId}` : '/favorite-books';
+      const endpoint = userId ? `/api/favorite-books/users/${userId}` : '/api/favorite-books';
       console.log('Calling favorite books endpoint:', endpoint);
       
       const response = await api.get(endpoint);
@@ -47,7 +47,7 @@ const favoriteBookService = {
   // Ajouter un livre aux favoris
   addFavoriteBook: async (bookId) => {
     try {
-      const response = await api.post('/favorite-books', { bookId });
+      const response = await api.post('/api/favorite-books', { bookId });
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Erreur lors de l\'ajout du livre aux favoris' };
@@ -57,7 +57,7 @@ const favoriteBookService = {
   // Mettre à jour la position d'un livre favori
   updatePosition: async (bookId, newPosition) => {
     try {
-      const response = await api.put(`/favorite-books/${bookId}/position`, { newPosition });
+      const response = await api.put(`/api/favorite-books/${bookId}/position`, { newPosition });
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Erreur lors de la mise à jour de la position' };
@@ -67,7 +67,7 @@ const favoriteBookService = {
   // Supprimer un livre des favoris
   removeFavoriteBook: async (bookId) => {
     try {
-      const response = await api.delete(`/favorite-books/${bookId}`);
+      const response = await api.delete(`/api/favorite-books/${bookId}`);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Erreur lors de la suppression du livre des favoris' };
@@ -77,12 +77,25 @@ const favoriteBookService = {
   // Mettre à jour l'ordre complet des livres favoris
   updateFavoriteBooks: async (books) => {
     try {
-      const updatePromises = books.map((book, index) => 
-        favoriteBookService.updatePosition(book.bookId, index + 1)
-      );
-      await Promise.all(updatePromises);
-      return await favoriteBookService.getFavoriteBooks();
+      console.log('Updating favorite books order:', books);
+      
+      // Mettre à jour les positions une par une
+      for (const book of books) {
+        console.log(`Updating position for book ${book.bookId} to position ${book.position}`);
+        try {
+          await favoriteBookService.updatePosition(book.bookId, book.position);
+        } catch (error) {
+          console.error(`Error updating position for book ${book.bookId}:`, error);
+          throw error;
+        }
+      }
+
+      // Récupérer la liste mise à jour
+      const updatedBooks = await favoriteBookService.getFavoriteBooks();
+      console.log('Updated books list:', updatedBooks);
+      return updatedBooks;
     } catch (error) {
+      console.error('Error in updateFavoriteBooks:', error);
       throw error.response?.data || { message: 'Erreur lors de la mise à jour des livres favoris' };
     }
   }

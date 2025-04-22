@@ -2,11 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import userService from '../services/userService';
+import favoriteBookService from '../services/favoriteBookService';
 import { Helmet } from 'react-helmet-async';
 import FavoriteBooksSelector from '../components/FavoriteBooksSelector';
 
 const EditProfilePage = () => {
-  const { user, updateUser } = useAuth();
+  const { user, isAuthenticated, updateUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -18,36 +19,59 @@ const EditProfilePage = () => {
     avatar: user?.avatar || '',
   });
 
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
   // Fetch favorite books on component mount
   useEffect(() => {
     const fetchFavoriteBooks = async () => {
       try {
-        const books = await userService.getFavoriteBooks();
+        if (!isAuthenticated) return; // Don't fetch if not authenticated
+        const books = await favoriteBookService.getFavoriteBooks();
         setFavoriteBooks(books);
       } catch (err) {
         console.error('Error fetching favorite books:', err);
+        if (err.response?.status === 401) {
+          navigate('/login');
+        }
       }
     };
     fetchFavoriteBooks();
-  }, []);
+  }, [isAuthenticated, navigate]);
 
   const handleFavoriteBooksChange = async (books) => {
     try {
-      // Trouver les nouveaux livres (ceux qui ne sont pas dans favoriteBooks)
+      // Find removed books (those that are in favoriteBooks but not in the new books array)
+      const removedBooks = favoriteBooks.filter(favBook => 
+        !books.some(book => book.bookId === favBook.bookId)
+      );
+
+      // Remove books first
+      for (const book of removedBooks) {
+        await favoriteBookService.removeFavoriteBook(book.bookId);
+      }
+
+      // Find new books (those that are not in favoriteBooks)
       const newBooks = books.filter(book => 
         !favoriteBooks.some(favBook => favBook.bookId === book.bookId)
       );
 
-      // Ajouter d'abord les nouveaux livres
+      // Add new books
       for (const book of newBooks) {
-        await userService.addFavoriteBook(book.bookId);
+        await favoriteBookService.addFavoriteBook(book.bookId);
       }
 
-      // Ensuite mettre à jour les positions
-      await userService.updateFavoriteBooks(books);
+      // Then update positions if there are any books left
+      if (books.length > 0) {
+        await favoriteBookService.updateFavoriteBooks(books);
+      }
       
-      // Rafraîchir la liste des favoris
-      const updatedBooks = await userService.getFavoriteBooks();
+      // Refresh the list of favorites
+      const updatedBooks = await favoriteBookService.getFavoriteBooks();
       setFavoriteBooks(updatedBooks);
     } catch (err) {
       console.error('Error updating favorite books:', err);

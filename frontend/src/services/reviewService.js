@@ -4,7 +4,7 @@ const reviewService = {
   // Créer une nouvelle review
   createReview: async (reviewData) => {
     try {
-      const response = await api.post('/reviews', reviewData);
+      const response = await api.post('/api/reviews', reviewData);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Une erreur est survenue lors de la création de la review' };
@@ -14,7 +14,7 @@ const reviewService = {
   // Récupérer les reviews d'un livre
   getBookReviews: async (bookId) => {
     try {
-      const response = await api.get(`/reviews/book/${bookId}`);
+      const response = await api.get(`/api/reviews/book/${bookId}`);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Une erreur est survenue lors de la récupération des reviews' };
@@ -24,7 +24,7 @@ const reviewService = {
   // Récupérer les reviews d'un utilisateur
   getUserReviews: async () => {
     try {
-      const response = await api.get('/reviews/user');
+      const response = await api.get('/api/reviews/user');
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Une erreur est survenue lors de la récupération des reviews' };
@@ -34,7 +34,7 @@ const reviewService = {
   // Modifier une review
   updateReview: async (reviewId, reviewData) => {
     try {
-      const response = await api.put(`/reviews/${reviewId}`, reviewData);
+      const response = await api.put(`/api/reviews/${reviewId}`, reviewData);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Une erreur est survenue lors de la modification de la review' };
@@ -44,7 +44,7 @@ const reviewService = {
   // Supprimer une review
   deleteReview: async (reviewId) => {
     try {
-      const response = await api.delete(`/reviews/${reviewId}`);
+      const response = await api.delete(`/api/reviews/${reviewId}`);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Une erreur est survenue lors de la suppression de la review' };

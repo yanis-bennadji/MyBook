@@ -5,7 +5,7 @@ const userService = {
   // Mettre à jour le profil utilisateur
   updateProfile: async (formData) => {
     try {
-      const response = await api.put('/users/profile', formData, {
+      const response = await api.put('/api/users/profile', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -19,7 +19,7 @@ const userService = {
   // Récupérer les informations du profil
   getProfile: async () => {
     try {
-      const response = await api.get('/users/profile');
+      const response = await api.get('/api/users/profile');
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Une erreur est survenue lors de la récupération du profil' };
@@ -29,7 +29,7 @@ const userService = {
   // Récupérer les informations d'un profil utilisateur par ID
   getProfileById: async (userId) => {
     try {
-      const response = await api.get(`/users/${userId}`);
+      const response = await api.get(`/api/users/${userId}`);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Une erreur est survenue lors de la récupération du profil' };
@@ -39,7 +39,7 @@ const userService = {
   // Rechercher des utilisateurs
   searchUsers: async (query) => {
     try {
-      const response = await api.get('/users/search', {
+      const response = await api.get('/api/users/search', {
         params: { q: query }
       });
       return response.data;
@@ -51,7 +51,7 @@ const userService = {
   // Récupérer les utilisateurs suggérés (les plus actifs)
   getSuggestedUsers: async (limit = 5) => {
     try {
-      const response = await api.get('/users/suggested', {
+      const response = await api.get('/api/users/suggested', {
         params: { limit }
       });
       return response.data;

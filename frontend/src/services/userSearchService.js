@@ -2,7 +2,7 @@ import api from './api';
 
 export const searchUsers = async (query) => {
   try {
-    const response = await api.get('/users/search', {
+    const response = await api.get('/api/users/search', {
       params: { q: query }
     });
     return response.data;
@@ -14,7 +14,7 @@ export const searchUsers = async (query) => {
 
 export const getSuggestedUsers = async (limit = 5) => {
   try {
-    const response = await api.get('/users/suggested', {
+    const response = await api.get('/api/users/suggested', {
       params: { limit }
     });
     return response.data;

@@ -5,7 +5,7 @@ const collectionService = {
   // Récupérer tous les livres lus par l'utilisateur
   getUserBooks: async () => {
     try {
-      const response = await api.get('/collections/read');
+      const response = await api.get('/api/collections/read');
       const collections = response.data;
       
       // Récupérer les détails de chaque livre via l'API Google Books
@@ -39,7 +39,7 @@ const collectionService = {
       const user = JSON.parse(userStr);
       console.log('Token présent:', !!user.token);
 
-      const response = await api.post('/collections', {
+      const response = await api.post('/api/collections', {
         bookId,
         status: 'read'
       });
@@ -56,7 +56,7 @@ const collectionService = {
   // Supprimer un livre de la collection
   removeBook: async (bookId) => {
     try {
-      const response = await api.delete(`/collections/${bookId}`);
+      const response = await api.delete(`/api/collections/${bookId}`);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Une erreur est survenue lors de la suppression du livre' };

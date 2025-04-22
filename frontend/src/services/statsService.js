@@ -5,7 +5,7 @@ const statsService = {
   // Récupérer toutes les statistiques de l'utilisateur
   getUserStats: async (userId = null) => {
     try {
-      const endpoint = userId ? `/stats/users/${userId}/stats` : '/stats/stats';
+      const endpoint = userId ? `/api/stats/users/${userId}/stats` : '/api/stats/stats';
       const response = await api.get(endpoint);
       return response.data;
     } catch (error) {
@@ -18,8 +18,8 @@ const statsService = {
     try {
       // Récupérer les critiques et les collections
       const [reviews, collections] = await Promise.all([
-        api.get(userId ? `/stats/users/${userId}/reviews` : '/stats/reviews'),
-        api.get(userId ? `/stats/users/${userId}/collections` : '/stats/collections')
+        api.get(userId ? `/api/stats/users/${userId}/reviews` : '/api/stats/reviews'),
+        api.get(userId ? `/api/stats/users/${userId}/collections` : '/api/stats/collections')
       ]);
 
       // Créer un tableau pour stocker toutes les activités

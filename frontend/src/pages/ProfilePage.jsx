@@ -66,15 +66,15 @@ const ProfilePage = () => {
     );
   }
 
-  if (error) {
+  if (error || !profileData) {
     return (
       <div className="min-h-screen bg-[#F9F6EF] pt-20 pb-12 flex justify-center items-center">
-        <div className="text-red-600">{error}</div>
+        <div className="text-red-600">{error || "Impossible de charger le profil"}</div>
       </div>
     );
   }
 
-  const isOwnProfile = !userId || userId === currentUser.id;
+  const isOwnProfile = !userId || (currentUser && userId === currentUser.id);
 
   return (
     <>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api/auth';
+const API_URL = import.meta.env.VITE_AUTH_API_URL;
 
 const VerifyEmailPage = () => {
   const { token } = useParams();
@@ -37,23 +37,21 @@ const VerifyEmailPage = () => {
   }, [token, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {status === 'error' ? 'Erreur' : 'Vérification'}
-          </h2>
-          <p className={`mt-2 text-center text-sm ${
-            status === 'error' ? 'text-red-600' : 
-            status === 'success' ? 'text-green-600' : 
-            'text-gray-600'
-          }`}>
-            {error || message}
-          </p>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+        <div className="text-center">
+          {status === 'pending' && (
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FFB100] border-t-transparent mx-auto"></div>
+          )}
           {status === 'success' && (
-            <p className="mt-2 text-center text-sm text-gray-500">
-              Redirection vers la page de connexion dans quelques secondes...
-            </p>
+            <div className="text-green-600 text-xl font-semibold">
+              ✓ {message}
+            </div>
+          )}
+          {status === 'error' && (
+            <div className="text-red-600 text-xl font-semibold">
+              ✕ {error}
+            </div>
           )}
         </div>
       </div>

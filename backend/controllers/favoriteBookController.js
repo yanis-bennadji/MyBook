@@ -68,22 +68,72 @@ const updatePosition = async (req, res) => {
     const { bookId } = req.params;
     const { newPosition } = req.body;
 
-    // Vérifier si le livre favori existe
-    const favorite = await prisma.favoriteBook.findFirst({
-      where: { userId, bookId }
+    // Utiliser une transaction pour garantir l'atomicité des opérations
+    const result = await prisma.$transaction(async (tx) => {
+      // Vérifier si le livre favori existe
+      const favorite = await tx.favoriteBook.findFirst({
+        where: { userId, bookId }
+      });
+
+      if (!favorite) {
+        return { status: 404, data: { message: 'Livre favori non trouvé' } };
+      }
+
+      // Si la nouvelle position est la même que l'ancienne, ne rien faire
+      if (favorite.position === newPosition) {
+        return { status: 200, data: favorite };
+      }
+
+      // Vérifier que la nouvelle position est valide (entre 1 et 4)
+      if (newPosition < 1 || newPosition > 4) {
+        return { status: 400, data: { message: 'Position invalide' } };
+      }
+
+      // Récupérer tous les livres favoris de l'utilisateur
+      const allFavorites = await tx.favoriteBook.findMany({
+        where: { userId },
+        orderBy: { position: 'asc' }
+      });
+
+      // Calculer les nouvelles positions
+      const updatedFavorites = allFavorites.map(book => {
+        if (book.id === favorite.id) {
+          return { ...book, position: newPosition };
+        }
+        if (newPosition > favorite.position) {
+          // Déplacement vers le bas
+          if (book.position > favorite.position && book.position <= newPosition) {
+            return { ...book, position: book.position - 1 };
+          }
+        } else {
+          // Déplacement vers le haut
+          if (book.position >= newPosition && book.position < favorite.position) {
+            return { ...book, position: book.position + 1 };
+          }
+        }
+        return book;
+      });
+
+      // Mettre à jour toutes les positions en une seule transaction
+      for (const book of updatedFavorites) {
+        await tx.favoriteBook.update({
+          where: { id: book.id },
+          data: { position: -book.position } // Utiliser des positions temporaires négatives
+        });
+      }
+
+      // Mettre à jour avec les positions finales
+      for (const book of updatedFavorites) {
+        await tx.favoriteBook.update({
+          where: { id: book.id },
+          data: { position: Math.abs(book.position) }
+        });
+      }
+
+      return { status: 200, data: favorite };
     });
 
-    if (!favorite) {
-      return res.status(404).json({ message: 'Livre favori non trouvé' });
-    }
-
-    // Mettre à jour la position
-    const updatedFavorite = await prisma.favoriteBook.update({
-      where: { id: favorite.id },
-      data: { position: newPosition }
-    });
-
-    res.json(updatedFavorite);
+    res.status(result.status).json(result.data);
   } catch (error) {
     console.error('Erreur lors de la mise à jour de la position:', error);
     res.status(500).json({ message: 'Erreur lors de la mise à jour de la position' });
@@ -105,22 +155,32 @@ const removeFavoriteBook = async (req, res) => {
       return res.status(404).json({ message: 'Livre favori non trouvé' });
     }
 
-    // Supprimer le favori
-    await prisma.favoriteBook.delete({
-      where: { id: favorite.id }
-    });
-
-    // Réorganiser les positions des favoris restants
-    const remainingFavorites = await prisma.favoriteBook.findMany({
-      where: { userId, position: { gt: favorite.position } }
-    });
-
-    for (const remaining of remainingFavorites) {
-      await prisma.favoriteBook.update({
-        where: { id: remaining.id },
-        data: { position: remaining.position - 1 }
+    // Utiliser une transaction pour garantir l'atomicité des opérations
+    await prisma.$transaction(async (tx) => {
+      // Supprimer le favori
+      await tx.favoriteBook.delete({
+        where: { id: favorite.id }
       });
-    }
+
+      // Récupérer et mettre à jour les positions des favoris restants en une seule opération
+      const remainingFavorites = await tx.favoriteBook.findMany({
+        where: {
+          userId,
+          position: { gt: favorite.position }
+        },
+        orderBy: { position: 'asc' }
+      });
+
+      // Mettre à jour les positions en une seule opération
+      await Promise.all(
+        remainingFavorites.map((book, index) =>
+          tx.favoriteBook.update({
+            where: { id: book.id },
+            data: { position: favorite.position + index }
+          })
+        )
+      );
+    });
 
     res.json({ message: 'Livre retiré des favoris avec succès' });
   } catch (error) {
