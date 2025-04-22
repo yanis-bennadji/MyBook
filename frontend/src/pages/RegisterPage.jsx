@@ -13,16 +13,69 @@ const RegisterPage = () => {
     password: '',
     confirmPassword: '',
   });
+  const [errors, setErrors] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
 
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    
+    if (password.length < minLength) {
+      return 'Le mot de passe doit contenir au moins 8 caractères';
+    }
+    if (!hasUpperCase) {
+      return 'Le mot de passe doit contenir au moins une majuscule';
+    }
+    if (!hasNumber) {
+      return 'Le mot de passe doit contenir au moins un chiffre';
+    }
+    if (!hasSymbol) {
+      return 'Le mot de passe doit contenir au moins un symbole';
+    }
+    
+    return '';
+  };
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+    
+    // Valider le mot de passe en temps réel
+    if (name === 'password') {
+      const passwordError = validatePassword(value);
+      setErrors({
+        ...errors,
+        password: passwordError
+      });
+    }
+    
+    // Vérifier si les mots de passe correspondent
+    if (name === 'confirmPassword' || (name === 'password' && formData.confirmPassword)) {
+      setErrors({
+        ...errors,
+        confirmPassword: 
+          name === 'confirmPassword' 
+            ? value !== formData.password 
+              ? 'Les mots de passe ne correspondent pas' 
+              : '' 
+            : formData.confirmPassword !== value 
+              ? 'Les mots de passe ne correspondent pas' 
+              : ''
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -30,7 +83,22 @@ const RegisterPage = () => {
     setError('');
     setNotification(null);
 
+    // Valider le mot de passe
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      setErrors({
+        ...errors,
+        password: passwordError
+      });
+      setError(passwordError);
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
+      setErrors({
+        ...errors,
+        confirmPassword: 'Les mots de passe ne correspondent pas'
+      });
       setError('Les mots de passe ne correspondent pas');
       return;
     }
@@ -106,15 +174,21 @@ const RegisterPage = () => {
             placeholder="Entrez votre email"
           />
 
-          <FormInput
-            label="Mot de passe"
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            placeholder="Créez un mot de passe"
-          />
+          <div>
+            <FormInput
+              label="Mot de passe"
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              placeholder="Créez un mot de passe"
+              error={errors.password}
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un symbole.
+            </p>
+          </div>
 
           <FormInput
             label="Confirmer le mot de passe"
@@ -124,13 +198,14 @@ const RegisterPage = () => {
             onChange={handleChange}
             required
             placeholder="Confirmez votre mot de passe"
+            error={errors.confirmPassword}
           />
 
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || errors.password || errors.confirmPassword}
             className={`w-full bg-[#0F3D3E] hover:bg-[#0F3D3E]/90 text-white py-2 px-4 rounded-lg transition-all duration-200 hover-scale ${
-              isLoading ? 'opacity-50 cursor-not-allowed' : ''
+              (isLoading || errors.password || errors.confirmPassword) ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
             {isLoading ? (

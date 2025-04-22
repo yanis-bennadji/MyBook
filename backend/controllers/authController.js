@@ -8,6 +8,12 @@ exports.register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
+    // Valider le mot de passe
+    const passwordValidation = validatePassword(password);
+    if (passwordValidation !== true) {
+      return res.status(400).json({ message: passwordValidation });
+    }
+
     // Vérifier si l'utilisateur existe déjà
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -48,6 +54,30 @@ exports.register = async (req, res) => {
     res.status(500).json({ message: 'Erreur lors de l\'inscription' });
   }
 };
+
+// Fonction d'aide pour valider le mot de passe
+function validatePassword(password) {
+  // Validation du mot de passe (min 8 caractères, 1 majuscule, 1 chiffre, 1 symbole)
+  const minLength = 8;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  
+  if (password.length < minLength) {
+    return 'Le mot de passe doit contenir au moins 8 caractères';
+  }
+  if (!hasUpperCase) {
+    return 'Le mot de passe doit contenir au moins une majuscule';
+  }
+  if (!hasNumber) {
+    return 'Le mot de passe doit contenir au moins un chiffre';
+  }
+  if (!hasSymbol) {
+    return 'Le mot de passe doit contenir au moins un symbole';
+  }
+  
+  return true;
+}
 
 exports.verifyEmail = async (req, res) => {
   try {
