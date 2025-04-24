@@ -1,7 +1,19 @@
 import api from './api';
 
+/**
+ * ! Review Service
+ * Manages all operations related to book reviews, including:
+ * - Creating and updating reviews
+ * - Fetching reviews by book or user
+ * - Deleting reviews
+ */
 const reviewService = {
-  // Créer une nouvelle review
+  /**
+   * * Create Review
+   * Creates a new review for a book
+   * @param {Object} reviewData - Review data including bookId, rating, and optional comment
+   * @returns {Promise<Object>} The created review
+   */
   createReview: async (reviewData) => {
     try {
       const response = await api.post('/api/reviews', reviewData);
@@ -11,7 +23,12 @@ const reviewService = {
     }
   },
 
-  // Récupérer les reviews d'un livre
+  /**
+   * * Get Book Reviews
+   * Retrieves all reviews for a specific book
+   * @param {string} bookId - Google Books ID
+   * @returns {Promise<Array>} Array of review objects
+   */
   getBookReviews: async (bookId) => {
     try {
       const response = await api.get(`/api/reviews/book/${bookId}`);
@@ -21,7 +38,11 @@ const reviewService = {
     }
   },
 
-  // Récupérer les reviews d'un utilisateur
+  /**
+   * * Get User Reviews
+   * Retrieves all reviews written by the current user
+   * @returns {Promise<Array>} Array of review objects
+   */
   getUserReviews: async () => {
     try {
       const response = await api.get('/api/reviews/user');
@@ -31,7 +52,13 @@ const reviewService = {
     }
   },
 
-  // Modifier une review
+  /**
+   * * Update Review
+   * Modifies an existing review
+   * @param {number} reviewId - ID of the review to update
+   * @param {Object} reviewData - Updated review data
+   * @returns {Promise<Object>} The updated review
+   */
   updateReview: async (reviewId, reviewData) => {
     try {
       const response = await api.put(`/api/reviews/${reviewId}`, reviewData);
@@ -41,7 +68,12 @@ const reviewService = {
     }
   },
 
-  // Supprimer une review
+  /**
+   * * Delete Review
+   * Removes a review from the database
+   * @param {number} reviewId - ID of the review to delete
+   * @returns {Promise<Object>} Confirmation message
+   */
   deleteReview: async (reviewId) => {
     try {
       const response = await api.delete(`/api/reviews/${reviewId}`);

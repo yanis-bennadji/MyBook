@@ -5,18 +5,42 @@ import { getSearchSuggestions } from '../services/googleBooksApi';
 import { useAuth } from '../contexts/AuthContext';
 import Button from './Button';
 
+/**
+ * ! Header Component
+ * Main navigation component that appears on all pages
+ * Includes:
+ * - Logo and brand
+ * - Search functionality with autocomplete suggestions
+ * - User authentication controls
+ * - Responsive design elements
+ */
 const Header = () => {
+  /**
+   * * Component State
+   */
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  
+  /**
+   * * Refs for DOM elements and timers
+   */
   const searchTimeout = useRef(null);
   const searchRef = useRef(null);
   const userMenuRef = useRef(null);
+  
+  /**
+   * * Auth context and navigation
+   */
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
 
+  /**
+   * ? Background Effect
+   * Changes header appearance on scroll
+   */
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
@@ -26,6 +50,10 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  /**
+   * ? Click Outside Effect
+   * Handles closing dropdowns when clicking outside
+   */
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -40,6 +68,10 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  /**
+   * * Search Input Handler
+   * Debounces search input and fetches suggestions
+   */
   const handleInputChange = (e) => {
     const newQuery = e.target.value;
     setQuery(newQuery);
@@ -58,6 +90,10 @@ const Header = () => {
     }, 300);
   };
 
+  /**
+   * * API Call for Suggestions
+   * Fetches book suggestions based on user input
+   */
   const fetchSuggestions = async (searchQuery) => {
     try {
       const results = await getSearchSuggestions(searchQuery);
@@ -70,12 +106,20 @@ const Header = () => {
     }
   };
 
+  /**
+   * * Suggestion Click Handler
+   * Navigates to book details when a suggestion is clicked
+   */
   const handleSuggestionClick = (suggestion) => {
     navigate(`/book/${suggestion.id}`);
     setShowSuggestions(false);
     setQuery('');
   };
 
+  /**
+   * * Search Form Submit Handler
+   * Navigates to search results page
+   */
   const handleSearch = (e) => {
     e.preventDefault();
     if (query.trim()) {
@@ -85,15 +129,27 @@ const Header = () => {
     }
   };
 
+  /**
+   * * Logout Handler
+   * Logs out the user and redirects to home
+   */
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
+  /**
+   * * User Menu Toggle
+   * Shows/hides the user dropdown menu
+   */
   const toggleUserMenu = () => {
     setShowUserMenu(!showUserMenu);
   };
 
+  /**
+   * * User Avatar Helpers
+   * Functions to safely access user properties
+   */
   // Fonction pour obtenir l'initiale de l'utilisateur de manière sécurisée
   const getUserInitial = () => {
     if (!user || !user.username) return 'U';

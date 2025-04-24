@@ -2,9 +2,18 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import Notification from '../components/Notification';
 import authService from '../services/authService';
 
+/**
+ * ! Authentication Context
+ * Provides global access to authentication state and operations.
+ * Manages user session persistence and notifications.
+ */
 const AuthContext = createContext();
 
-// Fonction pour obtenir l'état initial de l'authentification
+/**
+ * ? Helper Function - Initial Auth State
+ * Retrieves the persisted authentication state from localStorage
+ * @returns {Object} The initial authentication state object
+ */
 const getInitialAuthState = () => {
   const user = authService.getCurrentUser();
   return {
@@ -13,10 +22,24 @@ const getInitialAuthState = () => {
   };
 };
 
+/**
+ * * Auth Provider Component
+ * Wraps the application with authentication context
+ * @param {Object} props Component props
+ * @param {ReactNode} props.children Child components
+ */
 export const AuthProvider = ({ children }) => {
+  /**
+   * * State Management
+   */
   const [authState, setAuthState] = useState(getInitialAuthState());
   const [notification, setNotification] = useState(null);
 
+  /**
+   * * Login Handler
+   * Authenticates the user and updates global state
+   * @param {Object} userData User data including auth token
+   */
   const login = (userData) => {
     if (!userData || !userData.token) {
       setNotification({
@@ -33,6 +56,11 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  /**
+   * * Update User Handler
+   * Updates user profile information in state and localStorage
+   * @param {Object} userData Updated user data
+   */
   const updateUser = (userData) => {
     setAuthState(prev => ({
       ...prev,
@@ -48,6 +76,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /**
+   * * Logout Handler
+   * Terminates the user session and clears state
+   */
   const logout = () => {
     authService.logout();
     setAuthState({ user: null, isAuthenticated: false });
@@ -57,11 +89,18 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  /**
+   * ? Notification Clear Handler
+   * Removes the current notification from display
+   */
   const clearNotification = () => {
     setNotification(null);
   };
 
-  // Vérifier l'état de l'authentification au chargement
+  /**
+   * ? Auth Persistence Effect
+   * Restores auth state from localStorage on app initialization
+   */
   useEffect(() => {
     const user = authService.getCurrentUser();
     if (user) {
@@ -89,4 +128,9 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+/**
+ * * Auth Hook
+ * Custom hook to access auth context from any component
+ * @returns {Object} Authentication context values
+ */
 export const useAuth = () => useContext(AuthContext); 

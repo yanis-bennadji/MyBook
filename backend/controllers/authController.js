@@ -4,17 +4,34 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const emailService = require('../services/emailService');
 
+/**
+ * ! Authentication Controller
+ * Handles user authentication operations, including:
+ * - User registration with email verification
+ * - User login with JWT token generation
+ * - Email verification process
+ */
+
+/**
+ * * Register User
+ * Creates a new user account and sends verification email
+ * @route POST /api/auth/register
+ * @param {Object} req.body - User registration data
+ * @param {string} req.body.username - User's display name
+ * @param {string} req.body.email - User's email address
+ * @param {string} req.body.password - User's password
+ */
 exports.register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Valider le mot de passe
+    // Validate password strength
     const passwordValidation = validatePassword(password);
     if (passwordValidation !== true) {
       return res.status(400).json({ message: passwordValidation });
     }
 
-    // Vérifier si l'utilisateur existe déjà
+    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -23,13 +40,13 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: 'Cet email est déjà utilisé' });
     }
 
-    // Hash du mot de passe
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Générer un token de vérification
+    // Generate verification token
     const verificationToken = crypto.randomBytes(32).toString('hex');
 
-    // Créer l'utilisateur
+    // Create user
     const user = await prisma.user.create({
       data: {
         username,
@@ -39,10 +56,10 @@ exports.register = async (req, res) => {
       },
     });
 
-    // Envoyer l'email de vérification
+    // Send verification email
     await emailService.sendVerificationEmail(email, verificationToken);
 
-    // Ne pas renvoyer le mot de passe
+    // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
     res.status(201).json({
@@ -55,9 +72,14 @@ exports.register = async (req, res) => {
   }
 };
 
-// Fonction d'aide pour valider le mot de passe
+/**
+ * ? Password Validation Helper
+ * Verifies password meets security requirements
+ * @param {string} password - Password to validate
+ * @returns {boolean|string} True if valid, error message if invalid
+ */
 function validatePassword(password) {
-  // Validation du mot de passe (min 8 caractères, 1 majuscule, 1 chiffre, 1 symbole)
+  // Password validation (min 8 chars, 1 uppercase, 1 number, 1 symbol)
   const minLength = 8;
   const hasUpperCase = /[A-Z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
@@ -79,18 +101,27 @@ function validatePassword(password) {
   return true;
 }
 
+/**
+ * * Verify Email
+ * Validates a user's email verification token
+ * @route GET /api/auth/verify-email/:token
+ * @param {string} req.params.token - Email verification token
+ */
 exports.verifyEmail = async (req, res) => {
   try {
     const { token } = req.params;
     console.log('Tentative de vérification avec le token:', token);
 
-    // Vérifier que le token n'est pas vide
+    // Check if token is empty
     if (!token) {
       console.log('Token vide');
       return res.status(400).json({ message: 'Token de vérification manquant' });
     }
 
-    // Vérifier si le token existe dans la base de données
+    /**
+     * ? Token Validation
+     * Find user with matching token or already verified
+     */
     const user = await prisma.user.findFirst({
       where: {
         OR: [
@@ -110,7 +141,7 @@ exports.verifyEmail = async (req, res) => {
       return res.status(400).json({ message: 'Token de vérification invalide' });
     }
 
-    // Si l'utilisateur est déjà vérifié
+    // If user is already verified
     if (user.isVerified) {
       console.log('Utilisateur déjà vérifié:', user.email);
       return res.json({ message: 'Email déjà vérifié' });
@@ -118,6 +149,10 @@ exports.verifyEmail = async (req, res) => {
 
     console.log('Utilisateur trouvé:', user.email);
 
+    /**
+     * ? Update Verification Status
+     * Mark user as verified and clear token
+     */
     const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -140,11 +175,19 @@ exports.verifyEmail = async (req, res) => {
   }
 };
 
+/**
+ * * Login User
+ * Authenticates a user and generates JWT token
+ * @route POST /api/auth/login
+ * @param {Object} req.body - Login credentials
+ * @param {string} req.body.email - User's email
+ * @param {string} req.body.password - User's password
+ */
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Vérifier si l'utilisateur existe avec toutes ses données
+    // Find user with all necessary data
     const user = await prisma.user.findUnique({
       where: { email },
       select: {
@@ -162,28 +205,31 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
     }
 
-    // Vérifier si l'email est vérifié
+    // Check if email is verified
     if (!user.isVerified) {
       return res.status(401).json({ message: 'Veuillez vérifier votre email avant de vous connecter' });
     }
 
-    // Vérifier le mot de passe
+    // Verify password
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
     }
 
-    // Générer le token
+    /**
+     * ? JWT Generation
+     * Create authentication token with user ID
+     */
     const token = jwt.sign(
       { userId: user.id },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 
-    // Ne pas renvoyer le mot de passe
+    // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
-    // Renvoyer l'utilisateur et le token
+    // Return user and token
     res.json({
       user: userWithoutPassword,
       token

@@ -123,7 +123,21 @@ const ReadBooksPage = () => {
     if (book.review) {
       setSelectedReview(book);
       setShowReviewModal(true);
+    } else {
+      handleEditClick(book);
     }
+  };
+
+  const handleEditClick = (book) => {
+    setSelectedBook(book);
+    setEditForm({
+      finishDate: book.review?.finishDate 
+        ? new Date(book.review.finishDate).toISOString().split('T')[0] 
+        : new Date().toISOString().split('T')[0],
+      rating: book.review?.rating || 0,
+      comment: book.review?.comment || ''
+    });
+    setShowEditModal(true);
   };
 
   const handleRemoveBook = (book) => {
@@ -231,12 +245,14 @@ const ReadBooksPage = () => {
       >
         {/* Date */}
         <div className="w-24 text-center border-r border-gray-200 pr-4">
-          {date && (
+          {date ? (
             <>
               <div className="text-sm text-gray-500">{date.monthShort}</div>
               <div className="text-2xl font-bold text-gray-700">{date.day}</div>
               <div className="text-sm text-gray-500">{date.year}</div>
             </>
+          ) : (
+            <div className="text-sm text-gray-500">Date non spécifiée</div>
           )}
         </div>
 
@@ -319,7 +335,19 @@ const ReadBooksPage = () => {
   }
 
   const groupedBooks = books.reduce((acc, book) => {
-    if (!book.review?.finishDate) return acc;
+    if (!book.review?.finishDate) {
+      // Créer un groupe pour les livres sans date de fin
+      const key = 'no-date';
+      if (!acc[key]) {
+        acc[key] = {
+          year: 'Sans date',
+          month: 'Non spécifiée',
+          books: []
+        };
+      }
+      acc[key].books.push(book);
+      return acc;
+    }
     
     const date = formatDate(book.review.finishDate);
     const key = `${date.year}-${String(date.monthIndex).padStart(2, '0')}`;

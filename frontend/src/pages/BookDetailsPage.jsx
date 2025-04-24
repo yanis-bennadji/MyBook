@@ -8,7 +8,18 @@ import parse from 'html-react-parser';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
 
+/**
+ * ! Book Details Page
+ * Displays comprehensive information about a single book, including:
+ * - Book metadata (title, author, description, etc.)
+ * - User reviews and ratings
+ * - Collection management (add to collection, mark as read)
+ * - User interactions (rating, reviewing)
+ */
 const BookDetailsPage = () => {
+  /**
+   * * Component State
+   */
   const { bookId } = useParams();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,8 +36,16 @@ const BookDetailsPage = () => {
     comment: ''
   });
   const [hoverRating, setHoverRating] = useState(null);
+  
+  /**
+   * * Authentication Context
+   */
   const { isAuthenticated, user } = useAuth();
 
+  /**
+   * ? Page Title Effect
+   * Updates document title based on book data
+   */
   useEffect(() => {
     document.title = loading 
       ? 'Chargement... | MyBook' 
@@ -35,6 +54,15 @@ const BookDetailsPage = () => {
         : 'MyBook';
   }, [loading, book]);
 
+  /**
+   * * Text Processing Helpers
+   * Functions to clean and format book data
+   */
+  
+  /**
+   * ? Description Cleaner
+   * Removes HTML entities and tags from description
+   */
   const cleanDescription = (text) => {
     if (!text) return 'Aucune description disponible';
     
@@ -60,6 +88,10 @@ const BookDetailsPage = () => {
     return parsedText;
   };
 
+  /**
+   * ? Date Formatter
+   * Formats dates for display
+   */
   const formatDate = (dateString) => {
     if (!dateString) return 'Non spécifiée';
     
@@ -75,6 +107,10 @@ const BookDetailsPage = () => {
     }
   };
 
+  /**
+   * ? Language Translator
+   * Converts language codes to full names
+   */
   const getLanguageName = (code) => {
     if (!code) return 'Non spécifiée';
     
@@ -123,23 +159,28 @@ const BookDetailsPage = () => {
     return languageNames[code.toLowerCase()] || code;
   };
 
+  /**
+   * ? Image Quality Enhancer
+   * Improves book cover image quality
+   */
   const getHighQualityImageUrl = (url) => {
     if (!url) return 'https://via.placeholder.com/128x192?text=Image+non+disponible';
     
-    // Remplacer http par https
+    // Improve image URL quality
     let newUrl = url.replace('http://', 'https://');
-    
-    // Remplacer thumbnail par une version plus grande
     newUrl = newUrl.replace('zoom=1', 'zoom=3');
     newUrl = newUrl.replace('&edge=curl', '');
     
-    // Obtenir la meilleure qualité disponible
     return newUrl
       .replace('&fife=w200-h300', '')
       .replace('&w=128', '&w=512')
       .replace('&h=192', '&h=768');
   };
 
+  /**
+   * ! Main Data Fetching Effect
+   * Loads book details and user-specific data
+   */
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -147,6 +188,7 @@ const BookDetailsPage = () => {
         setError(null);
         console.log('Fetching data for bookId:', bookId);
         
+        // Fetch book details and reviews in parallel
         const [bookData, reviewsData] = await Promise.all([
           getBookDetails(bookId),
           reviewService.getBookReviews(bookId).catch(() => [])
@@ -156,11 +198,12 @@ const BookDetailsPage = () => {
         setBook(bookData);
         setReviews(reviewsData);
         
+        // Check user-specific data if authenticated
         if (isAuthenticated && user) {
           const hasReviewed = reviewsData.some(review => review.userId === user.id);
           setUserHasReviewed(hasReviewed);
           
-          // Vérifier si le livre est déjà dans la collection
+          // Check if book is in user's collection
           try {
             const userBooks = await collectionService.getUserBooks();
             console.log('User books:', userBooks);
@@ -183,6 +226,10 @@ const BookDetailsPage = () => {
     fetchData();
   }, [bookId, isAuthenticated, user]);
 
+  /**
+   * * Collection Management
+   * Handles adding books to user collection
+   */
   const handleAddToCollection = async () => {
     try {
       setAddingToCollection(true);
@@ -217,6 +264,15 @@ const BookDetailsPage = () => {
     }
   };
 
+  /**
+   * * Review Components
+   * Functions to render review-related UI elements
+   */
+
+  /**
+   * ? Star Rating Component
+   * Renders interactive star rating UI
+   */
   const renderEditableStars = () => {
     return (
       <div className="flex">
@@ -271,6 +327,10 @@ const BookDetailsPage = () => {
     );
   };
 
+  /**
+   * ? Reviews List Component
+   * Renders the list of user reviews
+   */
   const renderReviews = () => {
     if (reviews.length === 0) {
       return (
@@ -314,6 +374,10 @@ const BookDetailsPage = () => {
     );
   };
 
+  /**
+   * ? Main Content Renderer
+   * Conditionally renders loading or book content
+   */
   const renderContent = () => {
     if (loading) {
       return (

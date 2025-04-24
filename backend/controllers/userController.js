@@ -4,7 +4,18 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
 
-// Configuration de multer pour le stockage des avatars
+/**
+ * ! User Controller
+ * Handles all user-related operations including:
+ * - Profile management
+ * - User search
+ * - Avatar upload and management
+ */
+
+/**
+ * * Multer Configuration
+ * Sets up file storage for user avatar uploads
+ */
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'uploads/avatars/');
@@ -30,7 +41,11 @@ const upload = multer({
   }
 }).single('avatar');
 
-// Créer un nouvel utilisateur
+/**
+ * * Create User
+ * Creates a new user account with encrypted password
+ * @route POST /api/users
+ */
 const createUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -58,7 +73,12 @@ const createUser = async (req, res) => {
   }
 };
 
-// Mettre à jour le profil utilisateur
+/**
+ * * Update Profile
+ * Updates user profile information including avatar
+ * @route PUT /api/users/profile
+ * ? Handles file upload with multer middleware
+ */
 const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -74,10 +94,12 @@ const updateProfile = async (req, res) => {
           bio: req.body.bio
         };
 
+        // Handle avatar upload if file is provided
         if (req.file) {
           const avatarUrl = `/uploads/avatars/${req.file.filename}`;
           updateData.avatar_url = avatarUrl;
 
+          // Delete previous avatar if exists
           const currentUser = await prisma.user.findUnique({
             where: { id: userId },
             select: { avatar_url: true }
@@ -117,7 +139,11 @@ const updateProfile = async (req, res) => {
   }
 };
 
-// Récupérer le profil de l'utilisateur connecté
+/**
+ * * Get Current Profile
+ * Retrieves the logged-in user's profile
+ * @route GET /api/users/profile
+ */
 const getCurrentProfile = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -144,7 +170,11 @@ const getCurrentProfile = async (req, res) => {
   }
 };
 
-// Récupérer un utilisateur par son ID
+/**
+ * * Get User By ID
+ * Retrieves a specific user's public profile
+ * @route GET /api/users/:id
+ */
 const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -182,7 +212,11 @@ const getUserById = async (req, res) => {
   }
 };
 
-// Rechercher des utilisateurs
+/**
+ * * Search Users
+ * Searches for users by username
+ * @route GET /api/users/search
+ */
 const searchUsers = async (req, res) => {
   try {
     const { q } = req.query;

@@ -1,6 +1,18 @@
 const prisma = require('../config/prisma');
 
-// Récupérer tous les livres lus par l'utilisateur
+/**
+ * ! Collection Controller
+ * Manages user book collections with the following functionality:
+ * - Retrieving user's read books
+ * - Adding books to collection
+ * - Removing books from collection
+ */
+
+/**
+ * * Get Read Books
+ * Retrieves all books marked as read by the user
+ * @route GET /api/collections/read
+ */
 exports.getReadBooks = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -25,13 +37,23 @@ exports.getReadBooks = async (req, res) => {
   }
 };
 
-// Ajouter un livre à la collection
+/**
+ * * Add Book
+ * Adds a book to the user's collection
+ * @route POST /api/collections
+ * @param {Object} req.body - Book information
+ * @param {string} req.body.bookId - Google Books ID
+ * @param {string} req.body.status - Book status (e.g., 'read')
+ */
 exports.addBook = async (req, res) => {
   try {
     const userId = req.user.id;
     const { bookId, status } = req.body;
 
-    // Vérifier si le livre existe déjà dans la collection
+    /**
+     * ? Duplicate Check
+     * Verify the book isn't already in the collection
+     */
     const existingBook = await prisma.collection.findFirst({
       where: {
         userId,
@@ -59,7 +81,12 @@ exports.addBook = async (req, res) => {
   }
 };
 
-// Supprimer un livre de la collection
+/**
+ * * Remove Book
+ * Deletes a book from the user's collection
+ * @route DELETE /api/collections/:bookId
+ * @param {string} req.params.bookId - Google Books ID to remove
+ */
 exports.removeBook = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -76,16 +103,19 @@ exports.removeBook = async (req, res) => {
       return res.status(404).json({ message: 'Livre non trouvé dans votre collection' });
     }
 
-    // Supprimer dans une transaction pour garantir l'intégrité des données
+    /**
+     * ! Transaction
+     * Use a transaction to ensure data integrity when deleting related records
+     */
     await prisma.$transaction([
-      // Supprimer la critique si elle existe
+      // Delete associated review if exists
       prisma.review.deleteMany({
         where: {
           userId,
           bookId
         }
       }),
-      // Supprimer le livre de la collection
+      // Delete book from collection
       prisma.collection.delete({
         where: {
           id: book.id

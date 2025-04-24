@@ -1,8 +1,21 @@
 import axios from 'axios';
 
+/**
+ * ! Authentication Service
+ * Handles user authentication operations, including:
+ * - Login and registration
+ * - Session management
+ * - Token storage and retrieval
+ */
 const API_URL = import.meta.env.VITE_AUTH_API_URL;
 
 const authService = {
+  /**
+   * * Login
+   * Authenticates a user and stores session data
+   * @param {Object} credentials - User credentials (email, password)
+   * @returns {Promise<Object>} Authenticated user data with token
+   */
   login: async (credentials) => {
     try {
       const response = await axios.post(`${API_URL}/login`, credentials);
@@ -12,13 +25,15 @@ const authService = {
         throw new Error('Token manquant dans la réponse du serveur');
       }
 
-      // Créer l'objet utilisateur avec le token
+      /**
+       * ? Session Creation
+       * Create user object with token and store in localStorage
+       */
       const userData = {
         ...user,
         token
       };
 
-      // Stocker les données complètes dans le localStorage
       localStorage.setItem('user', JSON.stringify(userData));
 
       return userData;
@@ -27,6 +42,12 @@ const authService = {
     }
   },
 
+  /**
+   * * Register
+   * Creates a new user account
+   * @param {Object} userData - New user data (username, email, password)
+   * @returns {Promise<Object>} Registration confirmation
+   */
   register: async (userData) => {
     try {
       const response = await axios.post(`${API_URL}/register`, userData);
@@ -36,11 +57,20 @@ const authService = {
     }
   },
 
+  /**
+   * * Logout
+   * Terminates the user session
+   * Clears all localStorage data
+   */
   logout: () => {
     localStorage.clear();
   },
 
-  // Fonction pour récupérer l'utilisateur du localStorage
+  /**
+   * * Get Current User
+   * Retrieves the currently authenticated user from localStorage
+   * @returns {Object|null} Current user data or null if not authenticated
+   */
   getCurrentUser: () => {
     const userStr = localStorage.getItem('user');
     if (!userStr) return null;

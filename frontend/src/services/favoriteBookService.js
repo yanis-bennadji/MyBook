@@ -1,8 +1,20 @@
 import api from './api';
 import { getBookDetails } from './googleBooksApi';
 
+/**
+ * ! Favorite Book Service
+ * Manages user favorite books functionality, including:
+ * - Adding and removing favorite books
+ * - Retrieving favorite books with details
+ * - Managing the position/ordering of favorite books
+ */
 const favoriteBookService = {
-  // Récupérer tous les livres favoris
+  /**
+   * * Get Favorite Books
+   * Retrieves a user's favorite books with Google Books details
+   * @param {number|null} userId - Optional user ID (defaults to current user)
+   * @returns {Promise<Array>} Array of favorite books with details
+   */
   getFavoriteBooks: async (userId = null) => {
     try {
       const endpoint = userId ? `/api/favorite-books/users/${userId}` : '/api/favorite-books';
@@ -13,7 +25,10 @@ const favoriteBookService = {
       
       const favorites = response.data;
 
-      // Récupérer les détails des livres depuis l'API Google Books
+      /**
+       * ? Enrich with Google Books API
+       * Add book details like title, authors and cover image
+       */
       const favoritesWithDetails = await Promise.all(
         favorites.map(async (favorite) => {
           try {
@@ -44,7 +59,12 @@ const favoriteBookService = {
     }
   },
 
-  // Ajouter un livre aux favoris
+  /**
+   * * Add Favorite Book
+   * Adds a book to the user's favorites
+   * @param {string} bookId - Google Books ID to add
+   * @returns {Promise<Object>} The created favorite book entry
+   */
   addFavoriteBook: async (bookId) => {
     try {
       const response = await api.post('/api/favorite-books', { bookId });
@@ -54,7 +74,13 @@ const favoriteBookService = {
     }
   },
 
-  // Mettre à jour la position d'un livre favori
+  /**
+   * * Update Position
+   * Changes the position of a single favorite book
+   * @param {string} bookId - Google Books ID
+   * @param {number} newPosition - New position (1-4)
+   * @returns {Promise<Object>} The updated favorite book entry
+   */
   updatePosition: async (bookId, newPosition) => {
     try {
       const response = await api.put(`/api/favorite-books/${bookId}/position`, { newPosition });
@@ -64,7 +90,12 @@ const favoriteBookService = {
     }
   },
 
-  // Supprimer un livre des favoris
+  /**
+   * * Remove Favorite Book
+   * Deletes a book from the user's favorites
+   * @param {string} bookId - Google Books ID to remove
+   * @returns {Promise<Object>} Confirmation message
+   */
   removeFavoriteBook: async (bookId) => {
     try {
       const response = await api.delete(`/api/favorite-books/${bookId}`);
@@ -74,12 +105,20 @@ const favoriteBookService = {
     }
   },
 
-  // Mettre à jour l'ordre complet des livres favoris
+  /**
+   * * Update Favorite Books Order
+   * Reorders multiple favorite books at once
+   * @param {Array} books - Array of book objects with position information
+   * @returns {Promise<Array>} Updated array of favorite books
+   */
   updateFavoriteBooks: async (books) => {
     try {
       console.log('Updating favorite books order:', books);
       
-      // Mettre à jour les positions une par une
+      /**
+       * ? Sequential Position Updates
+       * Update each book's position one by one to maintain consistency
+       */
       for (const book of books) {
         console.log(`Updating position for book ${book.bookId} to position ${book.position}`);
         try {
@@ -90,7 +129,7 @@ const favoriteBookService = {
         }
       }
 
-      // Récupérer la liste mise à jour
+      // Retrieve the updated list
       const updatedBooks = await favoriteBookService.getFavoriteBooks();
       console.log('Updated books list:', updatedBooks);
       return updatedBooks;

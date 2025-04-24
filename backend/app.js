@@ -9,27 +9,40 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const favoriteBookRoutes = require('./routes/favoriteBookRoutes');
 const statsRoutes = require('./routes/statsRoutes');
 
+/**
+ * ! Application Configuration
+ */
 // Load environment variables
 dotenv.config();
 
+/**
+ * * Express Application Initialization
+ */
 const app = express();
 
-// Middleware
+/**
+ * * Middleware Configuration
+ */
+// Enable CORS for frontend communication
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
 }));
+// Parse JSON request bodies
 app.use(express.json());
 
-// Servir les fichiers statiques du dossier uploads
+// Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes
+/**
+ * * API Routes
+ */
+// Health check endpoint
 app.get('/ping', (req, res) => {
   res.send('pong');
 });
 
-// API Routes
+// Register API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/collections', collectionRoutes);
@@ -37,13 +50,18 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/favorite-books', favoriteBookRoutes);
 app.use('/api/stats', statsRoutes);
 
-// Error handling middleware
+/**
+ * * Error Handling Middleware
+ * ? Catches any unhandled errors in the application
+ */
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Une erreur est survenue sur le serveur' });
 });
 
-// Start server
+/**
+ * * Server Initialization
+ */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

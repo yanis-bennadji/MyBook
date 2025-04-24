@@ -1,11 +1,33 @@
 const prisma = require('../config/prisma');
 
+/**
+ * ! Review Controller
+ * Manages book reviews functionality, including:
+ * - Creating and updating reviews
+ * - Retrieving reviews by book or user
+ * - Handling review permissions
+ * - Deleting reviews
+ */
+
+/**
+ * * Create Review
+ * Adds a new review for a book
+ * @route POST /api/reviews
+ * @param {Object} req.body - Review data
+ * @param {string} req.body.bookId - Google Books ID
+ * @param {number} req.body.rating - Rating value (1-5)
+ * @param {string} req.body.comment - Optional review text
+ * @param {Date} req.body.finishDate - Optional date when book was finished
+ */
 exports.createReview = async (req, res) => {
   try {
     const { bookId, rating, comment, finishDate } = req.body;
-    const userId = req.user.id; // Récupéré depuis le middleware d'authentification
+    const userId = req.user.id; // Retrieved from auth middleware
 
-    // Vérifier si l'utilisateur a déjà fait une review pour ce livre
+    /**
+     * ? Duplicate Check
+     * Verify user hasn't already reviewed this book
+     */
     const existingReview = await prisma.review.findFirst({
       where: {
         userId,
@@ -42,6 +64,12 @@ exports.createReview = async (req, res) => {
   }
 };
 
+/**
+ * * Get Book Reviews
+ * Retrieves all reviews for a specific book
+ * @route GET /api/reviews/book/:bookId
+ * @param {string} req.params.bookId - Google Books ID
+ */
 exports.getBookReviews = async (req, res) => {
   try {
     const { bookId } = req.params;
@@ -76,6 +104,11 @@ exports.getBookReviews = async (req, res) => {
   }
 };
 
+/**
+ * * Get User Reviews
+ * Retrieves all reviews written by the authenticated user
+ * @route GET /api/reviews/user
+ */
 exports.getUserReviews = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -110,13 +143,23 @@ exports.getUserReviews = async (req, res) => {
   }
 };
 
+/**
+ * * Update Review
+ * Modifies an existing review
+ * @route PUT /api/reviews/:id
+ * @param {number} req.params.id - Review ID to update
+ * @param {Object} req.body - Updated review data
+ */
 exports.updateReview = async (req, res) => {
   try {
     const { id } = req.params;
     const { rating, comment, finishDate } = req.body;
     const userId = req.user.id;
 
-    // Vérifier si la review appartient à l'utilisateur
+    /**
+     * ? Permission Check
+     * Verify the review belongs to the authenticated user
+     */
     const review = await prisma.review.findUnique({
       where: { id: parseInt(id) }
     });
@@ -153,12 +196,21 @@ exports.updateReview = async (req, res) => {
   }
 };
 
+/**
+ * * Delete Review
+ * Removes a review from the database
+ * @route DELETE /api/reviews/:id
+ * @param {number} req.params.id - Review ID to delete
+ */
 exports.deleteReview = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
 
-    // Vérifier si la review appartient à l'utilisateur
+    /**
+     * ? Permission Check
+     * Verify the review belongs to the authenticated user
+     */
     const review = await prisma.review.findUnique({
       where: { id: parseInt(id) }
     });

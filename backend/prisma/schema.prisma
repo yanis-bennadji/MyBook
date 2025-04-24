@@ -1,5 +1,9 @@
 // This is your Prisma schema file
 
+/**
+ * ! Prisma Configuration
+ * Client generator and database connection settings
+ */
 generator client {
   provider = "prisma-client-js"
   output   = "../node_modules/.prisma/client"
@@ -10,6 +14,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/**
+ * * User Model
+ * Represents application users with authentication and profile data
+ */
 model User {
   id               Int            @id @default(autoincrement())
   username         String
@@ -20,6 +28,7 @@ model User {
   isVerified       Boolean        @default(false)
   verificationToken String?       @unique
   createdAt        DateTime       @default(now())
+  // ? Relationships
   reviews          Review[]
   collections      Collection[]
   favoriteBooks    FavoriteBook[]
@@ -27,6 +36,10 @@ model User {
   @@map("users")
 }
 
+/**
+ * * Review Model
+ * Stores user reviews and ratings for books
+ */
 model Review {
   id         Int         @id @default(autoincrement())
   userId     Int
@@ -35,6 +48,7 @@ model Review {
   comment    String?
   finishDate DateTime?
   createdAt  DateTime    @default(now())
+  // ? Relationships
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   collection Collection  @relation(fields: [userId, bookId], references: [userId, bookId])
 
@@ -42,12 +56,17 @@ model Review {
   @@map("reviews")
 }
 
+/**
+ * * Collection Model
+ * Tracks books in a user's collection with reading status
+ */
 model Collection {
   id         Int       @id @default(autoincrement())
   userId     Int
   bookId     String
   status     String
   finishDate DateTime?
+  // ? Relationships
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   review     Review?
 
@@ -56,12 +75,17 @@ model Collection {
   @@map("collections")
 }
 
+/**
+ * * FavoriteBook Model
+ * Stores a user's favorite books with positional ordering
+ */
 model FavoriteBook {
   id        Int      @id @default(autoincrement())
   userId    Int
   bookId    String
   position  Int      // Position du livre (1-4)
   createdAt DateTime @default(now())
+  // ? Relationships
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, position]) // Un seul livre par position pour chaque utilisateur
@@ -69,17 +93,27 @@ model FavoriteBook {
   @@map("favorite_books")
 }
 
+/**
+ * * Tag Model
+ * Represents book categories or genres
+ */
 model Tag {
   id       Int       @id @default(autoincrement())
   name     String    @unique
+  // ? Relationships
   bookTags BookTag[]
 
   @@map("tags")
 }
 
+/**
+ * * BookTag Model
+ * Junction table linking books with tags
+ */
 model BookTag {
   id     Int    @id @default(autoincrement())
   bookId String
+  // ? Relationships
   tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
   tagId  Int
 

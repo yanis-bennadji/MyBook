@@ -19,18 +19,30 @@ import EditProfilePage from './pages/EditProfilePage';
 import ReadBooksPage from './pages/ReadBooksPage';
 import NotFoundPage from './pages/NotFoundPage';
 
+/**
+ * ! Main Application Component
+ * This component serves as the root of the application, setting up:
+ * - Authentication context for user management
+ * - Routing system with protected routes
+ * - Global layout elements (header, footer)
+ */
 const App = () => {
   return (
     <HelmetProvider>
+      {/* * AuthProvider wraps the app to provide authentication state globally */}
       <AuthProvider>
         <Router>
           <div className="min-h-screen flex flex-col">
+            {/* * Global header with navigation and search functionality */}
             <Header />
             <main className="flex-grow">
               <Routes>
+                {/* ? Public routes accessible to all users */}
                 <Route path="/" element={<Home />} />
                 <Route path="/search" element={<SearchResultsPage />} />
                 <Route path="/book/:bookId" element={<BookDetailsPage />} />
+                
+                {/* ? Public routes only for non-authenticated users */}
                 <Route 
                   path="/login" 
                   element={
@@ -48,6 +60,8 @@ const App = () => {
                   } 
                 />
                 <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+                
+                {/* ? Protected routes requiring authentication */}
                 <Route 
                   path="/dashboard" 
                   element={
@@ -88,11 +102,15 @@ const App = () => {
                     </PrivateRoute>
                   } 
                 />
+                
+                {/* ? Error handling routes */}
                 <Route path="/404" element={<NotFoundPage />} />
                 <Route path="*" element={<Navigate to="/404" replace />} />
               </Routes>
             </main>
+            {/* * Global footer with site information */}
             <Footer />
+            {/* * Global components displayed on top of content */}
             <WelcomePopup />
             <UserSearch />
           </div>

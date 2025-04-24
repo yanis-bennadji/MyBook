@@ -1,8 +1,18 @@
 import api from './api';
 import { getBookDetails } from './googleBooksApi';
 
+/**
+ * ! Stats Service
+ * Handles fetching and processing user statistics and activity data.
+ * Integrates with Google Books API to enrich data with book details.
+ */
 const statsService = {
-  // Récupérer toutes les statistiques de l'utilisateur
+  /**
+   * * Get User Stats
+   * Retrieves aggregated statistics about a user's reading activity
+   * @param {number|null} userId - Optional user ID (defaults to current user)
+   * @returns {Promise<Object>} Statistics object with reading metrics
+   */
   getUserStats: async (userId = null) => {
     try {
       const endpoint = userId ? `/api/stats/users/${userId}/stats` : '/api/stats/stats';
@@ -13,22 +23,33 @@ const statsService = {
     }
   },
 
-  // Récupérer l'activité récente de l'utilisateur
+  /**
+   * * Get Recent Activity
+   * Retrieves and processes a user's recent reading activities
+   * @param {number|null} userId - Optional user ID (defaults to current user)
+   * @returns {Promise<Array>} Array of recent activity items with book details
+   */
   getRecentActivity: async (userId = null) => {
     try {
-      // Récupérer les critiques et les collections
+      /**
+       * ? Parallel API Requests
+       * Fetch both reviews and collections simultaneously
+       */
       const [reviews, collections] = await Promise.all([
         api.get(userId ? `/api/stats/users/${userId}/reviews` : '/api/stats/reviews'),
         api.get(userId ? `/api/stats/users/${userId}/collections` : '/api/stats/collections')
       ]);
 
-      // Créer un tableau pour stocker toutes les activités
+      // Create array for all activities
       let activities = [];
 
-      // Traiter les critiques
+      /**
+       * * Process Reviews
+       * Transform review data and enrich with book details
+       */
       for (const review of reviews.data) {
         try {
-          // Récupérer les détails du livre depuis l'API Google Books
+          // Get book details from Google Books API
           const bookDetails = await getBookDetails(review.bookId);
 
           activities.push({
@@ -45,12 +66,16 @@ const statsService = {
         }
       }
 
-      // Traiter les livres lus
+      /**
+       * * Process Collections (Read Books)
+       * Transform collection data and enrich with book details
+       * Avoid duplicates with books already processed from reviews
+       */
       for (const collection of collections.data) {
-        // Vérifier si ce livre n'a pas déjà été ajouté via une critique
+        // Check if this book hasn't already been added via a review
         if (!activities.some(activity => activity.bookId === collection.bookId)) {
           try {
-            // Récupérer les détails du livre depuis l'API Google Books
+            // Get book details from Google Books API
             const bookDetails = await getBookDetails(collection.bookId);
 
             activities.push({
@@ -67,10 +92,11 @@ const statsService = {
         }
       }
 
-      // Trier par date décroissante
+      /**
+       * ? Sort and Limit Results
+       * Sort by date (newest first) and return only the 5 most recent
+       */
       activities.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-      // Retourner les 5 activités les plus récentes
       return activities.slice(0, 5);
     } catch (error) {
       throw error.response?.data || { message: 'Une erreur est survenue lors de la récupération de l\'activité récente' };
