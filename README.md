@@ -1,5 +1,306 @@
 # 📚 MyBook
 
+<div align="center">
+  <a href="#-mybook-english">🇬🇧 English</a> | <a href="#-mybook-français">🇫🇷 Français</a>
+</div>
+
+---
+
+<div id="-mybook-english"></div>
+
+# 📚 MyBook (English)
+
+MyBook is a modern web application that allows book enthusiasts to manage their personal library, discover new books, and share their reviews with a community of readers.
+
+<div align="center">
+  <img src="frontend/src/assets/logo.png" alt="MyBook Logo" width="150"/>
+  <p><em>Your personal library, wherever you are</em></p>
+</div>
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Project Architecture](#-project-architecture)
+- [Technologies Used](#-technologies-used)
+- [System Requirements](#-system-requirements)
+- [Installation](#-installation)
+- [Tests](#-tests)
+- [Code Structure](#-code-structure)
+- [API](#-api)
+- [Security](#-security)
+- [Screenshots](#-screenshots)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Team](#-team)
+- [Contact](#-contact)
+
+## 🌟 Features
+
+- **Book Search**: Access a vast library through the Google Books API
+- **Personal Collection**: Manage your virtual library
+- **Favorite Books**: Mark your favorite books and organize them
+- **Rating and Review System**: Share your opinions and discover those of other readers
+- **User Profiles**: Customize your profile and view other users' libraries
+- **Reading Statistics**: Track your reading activity and habits
+- **Modern Interface**: A smooth and pleasant user experience
+- **Responsive Design**: Accessible on all your devices
+
+## 🏗 Project Architecture
+
+MyBook uses a modern client-server architecture:
+
+- **Frontend**: React.js application (SPA) served by Vite
+- **Backend**: RESTful API built with Node.js/Express
+- **Data Persistence**: MySQL with Prisma ORM
+- **Authentication**: JWT with email verification system
+
+```
+MyBook/
+├── frontend/           # React Application
+│   ├── src/
+│   │   ├── assets/     # Images, icons, etc.
+│   │   ├── components/ # Reusable components
+│   │   ├── contexts/   # React contexts (Auth, etc.)
+│   │   ├── pages/      # Application pages
+│   │   ├── services/   # API services
+│   │   └── utils/      # Utility functions
+├── backend/            # Node.js/Express API
+│   ├── config/         # Configuration
+│   ├── controllers/    # REST controllers
+│   ├── middleware/     # Express middleware
+│   ├── prisma/         # Prisma schema and migrations
+│   ├── routes/         # API route definitions
+│   ├── services/       # Business services
+│   └── tests/          # Unit and integration tests
+```
+
+## 🛠 Technologies Used
+
+### Frontend
+- **React.js**: JavaScript framework for user interface (v18+)
+- **Tailwind CSS**: Utility-first CSS framework for styling
+- **Axios**: HTTP client for API requests
+- **React Router**: Client-side routing
+- **Context API**: Global state management
+- **Vite**: Fast, modern build tool
+
+### Backend
+- **Node.js**: JavaScript runtime environment (v16+)
+- **Express**: Minimalist web framework for Node.js
+- **Prisma**: Modern ORM for MySQL
+- **MySQL**: Relational database
+- **JWT**: Secure authentication
+- **Multer**: File upload handling
+- **Jest**: JavaScript testing framework
+- **Nodemailer**: Email sending service
+- **Google Books API**: Book data source
+
+## 💻 System Requirements
+
+- **Node.js**: v16.0.0 or higher
+- **npm**: v8.0.0 or higher
+- **MySQL**: v8.0 or higher
+- **Disk space**: 500 MB minimum
+- **Supported browsers**: Chrome (v90+), Firefox (v90+), Safari (v14+), Edge (v90+)
+
+## 🚀 Installation
+
+1. **Clone the repository**:
+```bash
+git clone https://github.com/your-username/MyBook.git
+cd MyBook
+```
+
+2. **Install dependencies**:
+```bash
+# Install frontend dependencies
+cd frontend
+npm install
+
+# Install backend dependencies
+cd ../backend
+npm install
+```
+
+3. **Configure the database**:
+```bash
+# In the backend folder
+npx prisma migrate dev
+```
+
+4. **Set up environment variables**:
+```bash
+# In the backend folder
+cp .env.example .env
+# Fill in the following variables in .env:
+# - DATABASE_URL: MySQL connection URL
+# - JWT_SECRET: Secret key for JWT
+# - EMAIL_USER: Email for sending emails
+# - EMAIL_PASSWORD: Email password
+# - FRONTEND_URL: Frontend URL
+
+# In the frontend folder
+cp .env.example .env
+# Fill in the following variables in .env:
+# - VITE_API_URL: Backend API URL
+# - VITE_AUTH_API_URL: Authentication API URL
+# - VITE_GOOGLE_BOOKS_API_KEY: Your Google Books API key
+```
+
+5. **Launch the application**:
+```bash
+# In the backend folder
+npm run dev
+
+# In the frontend folder
+npm run dev
+```
+
+## 🧪 Tests
+
+MyBook has a Jest-based unit test suite for the backend.
+
+### Running Tests
+
+```bash
+# In the backend folder
+npm test
+
+# Run a specific test file
+npm test -- tests/auth.test.js
+
+# Run tests with code coverage
+npm test -- --coverage
+```
+
+### Test Structure
+
+Tests are organized by functional domain:
+- `auth.test.js`: Authentication functionality tests
+- `user.test.js`: User functionality tests
+
+## 📂 Code Structure
+
+The project follows an MVC (Model-View-Controller) architecture on the backend:
+
+- **Models**: Defined via Prisma in `prisma/schema.prisma`
+- **Controllers**: Implemented in `controllers/` (handle business logic)
+- **Routes**: Defined in `routes/` (expose API endpoints)
+
+The frontend uses a component-based architecture with a clear separation between:
+- **Components**: Reusable UI components
+- **Pages**: Component assemblies for specific routes
+- **Contexts**: Global state and shared logic
+- **Services**: Interfaces to external APIs
+
+## 📡 API
+
+The RESTful API exposes the following endpoints:
+
+### Authentication
+- `POST /api/auth/register`: Register a new user
+- `POST /api/auth/login`: User login
+- `GET /api/auth/verify-email/:token`: Email verification
+
+### Users
+- `GET /api/users/profile`: Get your profile
+- `PUT /api/users/profile`: Update your profile
+- `GET /api/users/:id`: View a profile
+- `GET /api/users/search`: Search for users
+- `GET /api/users/suggested`: Get user suggestions
+
+### Books and Collections
+- `GET /api/collections/read`: List of read books
+- `POST /api/collections`: Add a book to your collection
+- `DELETE /api/collections/:bookId`: Remove a book from your collection
+
+### Favorites
+- `GET /api/favorite-books`: List of favorite books
+- `POST /api/favorite-books`: Add a book to favorites
+- `PUT /api/favorite-books/:bookId/position`: Change a favorite's position
+- `DELETE /api/favorite-books/:bookId`: Remove a book from favorites
+
+### Reviews
+- `POST /api/reviews`: Create a review
+- `GET /api/reviews/book/:bookId`: Read reviews on a book
+- `GET /api/reviews/user`: Read a user's reviews
+- `PUT /api/reviews/:id`: Edit a review
+- `DELETE /api/reviews/:id`: Delete a review
+
+### Statistics
+- `GET /api/stats/stats`: Reading statistics
+- `GET /api/stats/reviews`: Review activity
+- `GET /api/stats/collections`: Collection activity
+
+## 🔐 Security
+
+For security reasons:
+- Never commit `.env` files
+- Always use environment variables for API keys and secrets
+- Restrict Google Books API access in the Google Cloud console
+- Passwords are hashed with bcrypt
+- Protection against CSRF and XSS attacks
+- Strict validation of user inputs
+- Mandatory email verification
+
+## 📱 Screenshots
+
+<details>
+<summary>Click to view screenshots</summary>
+
+[Coming soon]
+</details>
+
+## 🗺 Roadmap
+
+- **Q2 2024**: 
+  - Addition of reading groups
+  - AI-based book recommendations
+  - Offline mode
+
+- **Q3 2024**:
+  - Mobile application (React Native)
+  - Integration with other book APIs
+  - Barcode scanning to add books
+
+- **Q4 2024**:
+  - Advanced social features
+  - Dark mode
+  - Multi-language support
+
+## 🤝 Contributing
+
+Contributions are welcome! Here's how to contribute:
+
+1. Fork the project
+2. Create a branch for your feature (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+**Note**: Make sure your contributions respect the project's code conventions and that all tests pass.
+
+## 📝 License
+
+This project is licensed under the MIT License. See the `LICENSE` file for more details.
+
+## 👥 Team
+
+- **Yanis Bennadji** - Lead Developer - [GitHub](https://github.com/your-username)
+
+## 📬 Contact
+
+For any questions or suggestions, feel free to:
+- Open an issue on GitHub
+- Contact me by email: yanis.bennadji@laplateforme.io
+
+---
+
+<div id="-mybook-français"></div>
+
+# 📚 MyBook (Français)
+
 MyBook est une application web moderne permettant aux passionnés de lecture de gérer leur bibliothèque personnelle, de découvrir de nouveaux livres et de partager leurs avis avec une communauté de lecteurs.
 
 <div align="center">
