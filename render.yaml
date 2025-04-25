@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: mybook-backend
+    env: node
+    buildCommand: cd backend && npm install && npx prisma generate
+    startCommand: cd backend && node app.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mybook-db
+          property: connectionString
+
+  - type: web
+    name: mybook-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://mybook-backend.onrender.com
+
+databases:
+  - name: mybook-db
+    databaseName: mybook
+    ipAllowList: [] 

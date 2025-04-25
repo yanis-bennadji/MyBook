@@ -10,7 +10,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -71,7 +71,7 @@ model Collection {
   review     Review?
 
   @@unique([userId, bookId])
-  @@index([userId], map: "collections_userId_fkey")
+  @@index([userId], map: "collection_user_id_idx")
   @@map("collections")
 }
 
