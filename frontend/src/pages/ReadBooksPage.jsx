@@ -676,7 +676,7 @@ const ReadBooksPage = () => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes modal-slide-up {
           from {
             opacity: 0;

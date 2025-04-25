@@ -22,12 +22,22 @@ const prisma = require('../config/prisma');
 exports.createReview = async (req, res) => {
   try {
     const { bookId, rating, comment, finishDate } = req.body;
-    const userId = req.user.id; // Retrieved from auth middleware
+    const userId = req.user.id;
 
-    /**
-     * ? Duplicate Check
-     * Verify user hasn't already reviewed this book
-     */
+    // Vérifier si la collection existe
+    const collection = await prisma.collection.findUnique({
+      where: {
+        userId_bookId: {
+          userId,
+          bookId
+        }
+      }
+    });
+
+    if (!collection) {
+      return res.status(400).json({ message: 'Vous devez d\'abord ajouter ce livre à votre collection' });
+    }
+
     const existingReview = await prisma.review.findFirst({
       where: {
         userId,
