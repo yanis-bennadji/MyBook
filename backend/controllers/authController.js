@@ -196,6 +196,7 @@ exports.login = async (req, res) => {
         username: true,
         password: true,
         isVerified: true,
+        isAdmin: true,
         bio: true,
         avatar_url: true,
       }
@@ -221,7 +222,10 @@ exports.login = async (req, res) => {
      * Create authentication token with user ID
      */
     const token = jwt.sign(
-      { userId: user.id },
+      { 
+        userId: user.id,
+        isAdmin: user.isAdmin 
+      },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );

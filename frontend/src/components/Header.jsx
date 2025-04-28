@@ -244,103 +244,113 @@ const Header = () => {
 
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
-              <div className="relative" ref={userMenuRef}>
-                <button 
-                  onClick={toggleUserMenu} 
-                  className="flex items-center space-x-2 focus:outline-none"
-                >
-                  <div className="w-8 h-8 rounded-full overflow-hidden">
-                    {getAvatarUrl() ? (
-                      <img 
-                        src={getAvatarUrl()} 
-                        alt={`Avatar de ${getUsername()}`} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-[#0F3D3E] flex items-center justify-center text-white font-medium">
-                        {getUserInitial()}
-                      </div>
-                    )}
-                  </div>
-                  <span className="font-medium text-gray-700 hover:text-[#0F3D3E] transition-colors duration-200">
-                    {getUsername()}
-                  </span>
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    className={`h-4 w-4 text-gray-600 transition-transform duration-200 ${showUserMenu ? 'transform rotate-180' : ''}`} 
-                    viewBox="0 0 20 20" 
-                    fill="currentColor"
+              <>
+                {user?.isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200"
                   >
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                
-                {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
-                    <div className="px-4 py-2 border-b border-[#E2E2E2]">
-                      <p className="text-sm font-medium text-[#333333]">{getUsername()}</p>
-                      <p className="text-xs text-[#007C7C]">{user?.email}</p>
+                    Administration
+                  </Link>
+                )}
+                <div className="relative" ref={userMenuRef}>
+                  <button 
+                    onClick={toggleUserMenu} 
+                    className="flex items-center space-x-2 focus:outline-none"
+                  >
+                    <div className="w-8 h-8 rounded-full overflow-hidden">
+                      {getAvatarUrl() ? (
+                        <img 
+                          src={getAvatarUrl()} 
+                          alt={`Avatar de ${getUsername()}`} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-[#0F3D3E] flex items-center justify-center text-white font-medium">
+                          {getUserInitial()}
+                        </div>
+                      )}
                     </div>
-                    <Link
-                      to="/dashboard"
-                      className="block px-4 py-2 text-sm text-[#333333] hover:bg-[#F9F6EF] hover:text-[#004F4F]"
+                    <span className="font-medium text-gray-700 hover:text-[#0F3D3E] transition-colors duration-200">
+                      {getUsername()}
+                    </span>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className={`h-4 w-4 text-gray-600 transition-transform duration-200 ${showUserMenu ? 'transform rotate-180' : ''}`} 
+                      viewBox="0 0 20 20" 
+                      fill="currentColor"
                     >
-                      <div className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-                        </svg>
-                        Tableau de bord
+                      <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                  
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                      <div className="px-4 py-2 border-b border-[#E2E2E2]">
+                        <p className="text-sm font-medium text-[#333333]">{getUsername()}</p>
+                        <p className="text-xs text-[#007C7C]">{user?.email}</p>
                       </div>
-                    </Link>
-                    <Link
-                      to="/books/read"
-                      className="block px-4 py-2 text-sm text-[#333333] hover:bg-[#F9F6EF] hover:text-[#004F4F]"
-                    >
-                      <div className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
-                        </svg>
-                        Mes Livres Lus
-                      </div>
-                    </Link>
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 text-sm text-[#333333] hover:bg-[#F9F6EF] hover:text-[#004F4F]"
-                    >
-                      <div className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                        </svg>
-                        Mon profil
-                      </div>
-                    </Link>
-                    <Link
-                      to="/profile/edit"
-                      className="block px-4 py-2 text-sm text-[#333333] hover:bg-[#F9F6EF] hover:text-[#004F4F]"
-                    >
-                      <div className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                        Modifier mon profil
-                      </div>
-                    </Link>
-                    <div className="border-t border-[#E2E2E2] mt-2 pt-2">
-                      <button
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-[#333333] hover:bg-[#F9F6EF] hover:text-[#004F4F]"
+                      <Link
+                        to="/dashboard"
+                        className="block px-4 py-2 text-sm text-[#333333] hover:bg-[#F9F6EF] hover:text-[#004F4F]"
                       >
                         <div className="flex items-center gap-2">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
+                            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                           </svg>
-                          Se déconnecter
+                          Tableau de bord
                         </div>
-                      </button>
+                      </Link>
+                      <Link
+                        to="/books/read"
+                        className="block px-4 py-2 text-sm text-[#333333] hover:bg-[#F9F6EF] hover:text-[#004F4F]"
+                      >
+                        <div className="flex items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                          </svg>
+                          Mes Livres Lus
+                        </div>
+                      </Link>
+                      <Link
+                        to="/profile"
+                        className="block px-4 py-2 text-sm text-[#333333] hover:bg-[#F9F6EF] hover:text-[#004F4F]"
+                      >
+                        <div className="flex items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                          Mon profil
+                        </div>
+                      </Link>
+                      <Link
+                        to="/profile/edit"
+                        className="block px-4 py-2 text-sm text-[#333333] hover:bg-[#F9F6EF] hover:text-[#004F4F]"
+                      >
+                        <div className="flex items-center gap-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                          </svg>
+                          Modifier mon profil
+                        </div>
+                      </Link>
+                      <div className="border-t border-[#E2E2E2] mt-2 pt-2">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-sm text-[#333333] hover:bg-[#F9F6EF] hover:text-[#004F4F]"
+                        >
+                          <div className="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
+                            </svg>
+                            Se déconnecter
+                          </div>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              </>
             ) : (
               <>
                 <Link to="/login" className="text-gray-700 hover:text-[#0F3D3E] transition-colors duration-200">

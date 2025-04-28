@@ -29,6 +29,13 @@ const LoginPage = () => {
     });
   };
 
+  const handleAdminLogin = () => {
+    setCredentials({
+      email: 'admin@mybook.com',
+      password: 'Admin@2024'
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -102,13 +109,23 @@ const LoginPage = () => {
               )}
             </Button>
 
-            <Button
-              type="button"
-              onClick={handleQuickLogin}
-              className="w-full bg-gray-100 text-gray-700"
-            >
-              Connexion rapide
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                onClick={handleQuickLogin}
+                className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+              >
+                Connexion rapide
+              </Button>
+
+              <Button
+                type="button"
+                onClick={handleAdminLogin}
+                className="flex-1 bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+              >
+                Admin
+              </Button>
+            </div>
           </div>
 
           <div className="text-center mt-4">

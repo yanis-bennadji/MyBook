@@ -8,6 +8,7 @@ const collectionRoutes = require('./routes/collectionRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const favoriteBookRoutes = require('./routes/favoriteBookRoutes');
 const statsRoutes = require('./routes/statsRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 /**
  * ! Application Configuration
@@ -49,6 +50,7 @@ app.use('/api/collections', collectionRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/favorite-books', favoriteBookRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/admin', adminRoutes);
 
 /**
  * * Error Handling Middleware

@@ -26,6 +26,7 @@ model User {
   bio              String?
   avatar_url       String?
   isVerified       Boolean        @default(false)
+  isAdmin          Boolean        @default(false)
   verificationToken String?       @unique
   createdAt        DateTime       @default(now())
   // ? Relationships
