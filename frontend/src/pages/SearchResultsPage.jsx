@@ -3,10 +3,11 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { searchBooks } from '../services/googleBooksApi';
 
 const SearchResultsPage = ({ onBookSelect, isSelector }) => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');  // Nouvel état local pour le mode sélecteur
 
   useEffect(() => {
     const query = searchParams.get('q');
@@ -47,10 +48,15 @@ const SearchResultsPage = ({ onBookSelect, isSelector }) => {
 
   const handleInputChange = (e) => {
     const value = e.target.value;
-    if (value.length >= 3) {
-      handleSearch(value);
+    if (isSelector) {
+      setSearchQuery(value);
+      if (value.length >= 3) {
+        handleSearch(value);
+      } else {
+        setBooks([]);
+      }
     } else {
-      setBooks([]);
+      setSearchParams({ q: value });
     }
   };
 
@@ -137,7 +143,7 @@ const SearchResultsPage = ({ onBookSelect, isSelector }) => {
             <div className="mb-6">
               <input
                 type="text"
-                value={searchParams.get('q') || ''}
+                value={isSelector ? searchQuery : (searchParams.get('q') || '')}
                 onChange={handleInputChange}
                 placeholder="Rechercher un livre..."
                 className="w-full px-4 py-2 border-2 rounded-lg transition-all duration-200 border-[#0F3D3E]/20 focus:ring-2 focus:ring-[#FFB100]/20 focus:border-[#FFB100] focus:outline-none"
@@ -174,4 +180,4 @@ const SearchResultsPage = ({ onBookSelect, isSelector }) => {
   );
 };
 
-export default SearchResultsPage; 
+export default SearchResultsPage;

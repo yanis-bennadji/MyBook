@@ -134,7 +134,7 @@ const FavoriteBooksSelector = ({ selectedBooks = [], onChange }) => {
               onClick={() => setIsSearchOpen(false)}
             ></div>
 
-            <div className="relative bg-white w-full max-w-2xl rounded-xl shadow-2xl transform transition-all">
+            <div className="relative bg-white w-full max-w-2xl rounded-xl shadow-2xl transform transition-all p-6">
               <div className="absolute top-4 right-4">
                 <button
                   type="button"
@@ -147,11 +147,13 @@ const FavoriteBooksSelector = ({ selectedBooks = [], onChange }) => {
                 </button>
               </div>
 
-              <div className="p-6">
+              <div className="pt-2">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">
                   Ajouter un livre aux favoris
                 </h2>
-                <SearchResultsPage onBookSelect={handleAddBook} isSelector={true} />
+                <div className="mt-2">
+                  <SearchResultsPage onBookSelect={handleAddBook} isSelector={true} />
+                </div>
               </div>
             </div>
           </div>
@@ -161,4 +163,4 @@ const FavoriteBooksSelector = ({ selectedBooks = [], onChange }) => {
   );
 };
 
-export default FavoriteBooksSelector; 
+export default FavoriteBooksSelector;
