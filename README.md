@@ -79,7 +79,7 @@ MyBook/
 
 ### Frontend
 - **React.js**: JavaScript framework for user interface (v18+)
-- **Tailwind CSS**: Utility-first CSS framework for styling
+  - **Tailwind CSS**: Utility-first CSS framework for styling
 - **Axios**: HTTP client for API requests
 - **React Router**: Client-side routing
 - **Context API**: Global state management

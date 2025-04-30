@@ -92,31 +92,4 @@ model FavoriteBook {
   @@unique([userId, position]) // Un seul livre par position pour chaque utilisateur
   @@unique([userId, bookId])   // Un livre ne peut être favori qu'une seule fois par utilisateur
   @@map("favorite_books")
-}
-
-/**
- * * Tag Model
- * Represents book categories or genres
- */
-model Tag {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  // ? Relationships
-  bookTags BookTag[]
-
-  @@map("tags")
-}
-
-/**
- * * BookTag Model
- * Junction table linking books with tags
- */
-model BookTag {
-  id     Int    @id @default(autoincrement())
-  bookId String
-  // ? Relationships
-  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
-  tagId  Int
-
-  @@map("book_tags")
 } 
