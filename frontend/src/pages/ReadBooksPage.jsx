@@ -41,7 +41,14 @@ const ReadBooksPage = () => {
         };
       });
 
-      setBooks(booksWithReviews);
+      // Trier les livres par date de lecture (finishDate) ou date de création
+      const sortedBooks = booksWithReviews.sort((a, b) => {
+        const dateA = a.review?.finishDate || a.createdAt;
+        const dateB = b.review?.finishDate || b.createdAt;
+        return new Date(dateB) - new Date(dateA);
+      });
+
+      setBooks(sortedBooks);
     } catch (err) {
       setError('Une erreur est survenue lors de la récupération de vos livres');
     } finally {

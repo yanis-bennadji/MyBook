@@ -4,18 +4,17 @@ import { searchBooks } from '../services/googleBooksApi';
 
 const SearchResultsPage = ({ onBookSelect, isSelector }) => {
   const [searchParams] = useSearchParams();
-  const [query, setQuery] = useState(searchParams.get('q') || '');
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!isSelector) {
-      document.title = query 
-        ? `Recherche: ${query} | MyBook` 
-        : 'Recherche | MyBook';
+    const query = searchParams.get('q');
+    if (!isSelector && query) {
+      document.title = `Recherche: ${query} | MyBook`;
+      handleSearch(query);
     }
-  }, [query, isSelector]);
+  }, [searchParams, isSelector]);
 
   const getHighQualityImageUrl = (url) => {
     if (!url) return null;
@@ -46,15 +45,8 @@ const SearchResultsPage = ({ onBookSelect, isSelector }) => {
     }
   };
 
-  useEffect(() => {
-    if (!isSelector && query) {
-      handleSearch(query);
-    }
-  }, [query, isSelector]);
-
   const handleInputChange = (e) => {
     const value = e.target.value;
-    setQuery(value);
     if (value.length >= 3) {
       handleSearch(value);
     } else {
@@ -127,7 +119,7 @@ const SearchResultsPage = ({ onBookSelect, isSelector }) => {
     );
   };
 
-  if (!isSelector && !query) {
+  if (!isSelector && !searchParams.get('q')) {
     return (
       <div className="min-h-screen bg-white">
         <div className="pt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -145,7 +137,7 @@ const SearchResultsPage = ({ onBookSelect, isSelector }) => {
             <div className="mb-6">
               <input
                 type="text"
-                value={query}
+                value={searchParams.get('q') || ''}
                 onChange={handleInputChange}
                 placeholder="Rechercher un livre..."
                 className="w-full px-4 py-2 border-2 rounded-lg transition-all duration-200 border-[#0F3D3E]/20 focus:ring-2 focus:ring-[#FFB100]/20 focus:border-[#FFB100] focus:outline-none"
@@ -153,7 +145,7 @@ const SearchResultsPage = ({ onBookSelect, isSelector }) => {
             </div>
           ) : (
             <h1 className="text-3xl font-bold text-[#0F3D3E] mb-8">
-              Résultats pour "{query}"
+              Résultats pour "{searchParams.get('q')}"
             </h1>
           )}
 
@@ -166,9 +158,9 @@ const SearchResultsPage = ({ onBookSelect, isSelector }) => {
               {error}
             </div>
           ) : books.length === 0 ? (
-            query.length >= 3 ? (
+            searchParams.get('q')?.length >= 3 ? (
               <div className="text-center py-4">
-                Aucun résultat trouvé pour "{query}"
+                Aucun résultat trouvé pour "{searchParams.get('q')}"
               </div>
             ) : null
           ) : (

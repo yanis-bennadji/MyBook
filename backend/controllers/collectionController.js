@@ -25,9 +25,11 @@ exports.getReadBooks = async (req, res) => {
       include: {
         review: true
       },
-      orderBy: {
-        id: 'desc'
-      }
+      orderBy: [
+        {
+          finishDate: 'desc'
+        }
+      ]
     });
 
     res.json(books);
