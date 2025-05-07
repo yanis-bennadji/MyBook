@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/auth');
 const collectionRoutes = require('./routes/collectionRoutes');
@@ -27,8 +28,13 @@ const app = express();
 // Enable CORS for frontend communication
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
+  credentials: true,
+  exposedHeaders: ['set-cookie']
 }));
+
+// Parse cookies
+app.use(cookieParser());
+
 // Parse JSON request bodies
 app.use(express.json());
 

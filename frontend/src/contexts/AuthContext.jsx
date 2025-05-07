@@ -10,19 +10,6 @@ import authService from '../services/authService';
 const AuthContext = createContext();
 
 /**
- * ? Helper Function - Initial Auth State
- * Retrieves the persisted authentication state from localStorage
- * @returns {Object} The initial authentication state object
- */
-const getInitialAuthState = () => {
-  const user = authService.getCurrentUser();
-  return {
-    user,
-    isAuthenticated: !!user
-  };
-};
-
-/**
  * * Auth Provider Component
  * Wraps the application with authentication context
  * @param {Object} props Component props
@@ -32,24 +19,32 @@ export const AuthProvider = ({ children }) => {
   /**
    * * State Management
    */
-  const [authState, setAuthState] = useState(getInitialAuthState());
+  const [authState, setAuthState] = useState({
+    user: null,
+    isAuthenticated: false,
+    isLoading: true
+  });
   const [notification, setNotification] = useState(null);
 
   /**
    * * Login Handler
    * Authenticates the user and updates global state
-   * @param {Object} userData User data including auth token
+   * @param {Object} userData User data
    */
   const login = (userData) => {
-    if (!userData || !userData.token) {
+    if (!userData) {
       setNotification({
-        message: 'Erreur de connexion : token manquant',
+        message: 'Erreur de connexion : données utilisateur manquantes',
         type: 'error'
       });
       return;
     }
 
-    setAuthState({ user: userData, isAuthenticated: true });
+    setAuthState({
+      user: userData,
+      isAuthenticated: true,
+      isLoading: false
+    });
     setNotification({
       message: 'Connexion réussie ! Bienvenue !',
       type: 'success'
@@ -58,7 +53,7 @@ export const AuthProvider = ({ children }) => {
 
   /**
    * * Update User Handler
-   * Updates user profile information in state and localStorage
+   * Updates user profile information in state
    * @param {Object} userData Updated user data
    */
   const updateUser = (userData) => {
@@ -66,23 +61,19 @@ export const AuthProvider = ({ children }) => {
       ...prev,
       user: { ...prev.user, ...userData }
     }));
-    // Mettre à jour le localStorage
-    const currentUser = authService.getCurrentUser();
-    if (currentUser) {
-      localStorage.setItem('user', JSON.stringify({
-        ...currentUser,
-        ...userData
-      }));
-    }
   };
 
   /**
    * * Logout Handler
    * Terminates the user session and clears state
    */
-  const logout = () => {
-    authService.logout();
-    setAuthState({ user: null, isAuthenticated: false });
+  const logout = async () => {
+    await authService.logout();
+    setAuthState({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false
+    });
     setNotification({
       message: 'Vous avez été déconnecté avec succès.',
       type: 'info'
@@ -99,19 +90,46 @@ export const AuthProvider = ({ children }) => {
 
   /**
    * ? Auth Persistence Effect
-   * Restores auth state from localStorage on app initialization
+   * Checks authentication status on mount and after refreshes
    */
   useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (user) {
-      setAuthState({ user, isAuthenticated: true });
-    }
+    const checkAuth = async () => {
+      try {
+        const user = await authService.getCurrentUser();
+        if (user) {
+          setAuthState({
+            user,
+            isAuthenticated: true,
+            isLoading: false
+          });
+        } else {
+          setAuthState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false
+          });
+        }
+      } catch (error) {
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false
+        });
+      }
+    };
+
+    checkAuth();
   }, []);
+
+  if (authState.isLoading) {
+    return <div>Chargement...</div>; // Or your loading component
+  }
 
   return (
     <AuthContext.Provider value={{ 
       user: authState.user, 
-      isAuthenticated: authState.isAuthenticated, 
+      isAuthenticated: authState.isAuthenticated,
+      isLoading: authState.isLoading,
       login,
       logout,
       updateUser
