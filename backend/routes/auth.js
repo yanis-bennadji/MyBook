@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const authenticateToken = require('../middleware/auth');
 
 /**
  * ! Authentication Routes
@@ -17,9 +18,23 @@ router.post('/register', authController.register);
 /**
  * * User Login
  * @route POST /api/auth/login
- * @desc Authenticate a user and return token
+ * @desc Authenticate a user and set cookie
  */
 router.post('/login', authController.login);
+
+/**
+ * * User Logout
+ * @route POST /api/auth/logout
+ * @desc Clear authentication cookie
+ */
+router.post('/logout', authController.logout);
+
+/**
+ * * Get Current User
+ * @route GET /api/auth/me
+ * @desc Get current authenticated user data
+ */
+router.get('/me', authenticateToken, authController.getCurrentUser);
 
 /**
  * * Email Verification

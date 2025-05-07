@@ -218,8 +218,8 @@ exports.login = async (req, res) => {
     }
 
     /**
-     * ? JWT Generation
-     * Create authentication token with user ID
+     * ? JWT Generation and Cookie Setting
+     * Create authentication token with user ID and set httpOnly cookie
      */
     const token = jwt.sign(
       { 
@@ -230,17 +230,71 @@ exports.login = async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    // Set JWT in httpOnly cookie
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
-    // Return user and token
+    // Return user data without token
     res.json({
-      user: userWithoutPassword,
-      token
+      user: userWithoutPassword
     });
   } catch (error) {
     console.error('Erreur lors de la connexion:', error);
     res.status(500).json({ message: 'Erreur lors de la connexion' });
+  }
+};
+
+// Add logout endpoint
+exports.logout = async (req, res) => {
+  try {
+    res.cookie('jwt', '', {
+      httpOnly: true,
+      expires: new Date(0),
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+    res.json({ message: 'Déconnexion réussie' });
+  } catch (error) {
+    console.error('Erreur lors de la déconnexion:', error);
+    res.status(500).json({ message: 'Erreur lors de la déconnexion' });
+  }
+};
+
+/**
+ * * Get Current User
+ * Returns the current authenticated user's data
+ * @route GET /api/auth/me
+ */
+exports.getCurrentUser = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        isVerified: true,
+        isAdmin: true,
+        bio: true,
+        avatar_url: true,
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    res.json({ user });
+  } catch (error) {
+    console.error('Erreur lors de la récupération de l\'utilisateur:', error);
+    res.status(500).json({ message: 'Erreur lors de la récupération de l\'utilisateur' });
   }
 };
 

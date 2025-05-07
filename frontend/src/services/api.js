@@ -6,35 +6,14 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true // Enable sending cookies with requests
 });
-
-// Intercepteur pour ajouter le token aux requêtes
-api.interceptors.request.use(
-  (config) => {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        if (user && user.token) {
-          config.headers.Authorization = `Bearer ${user.token}`;
-        }
-      } catch (error) {
-        console.error('Erreur lors du parsing du token:', error);
-      }
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 // Intercepteur pour gérer les erreurs d'authentification
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && 
-        error.response?.data?.message === 'Token invalide ou expiré') {
+    if (error.response?.status === 401) {
       authService.logout();
       window.location.href = '/login';
     }
