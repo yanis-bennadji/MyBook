@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { searchBooks } from '../services/googleBooksApi';
+import { searchBooks, getSearchSuggestions, getBookDetails } from '../services/googleBooksApi';
 
 const BookSearch = ({ onBookSelect }) => {
   const [query, setQuery] = useState('');
@@ -26,9 +26,31 @@ const BookSearch = ({ onBookSelect }) => {
     };
   }, []);
 
-  const handleBookSelect = (book) => {
+  const handleBookSelect = async (book) => {
     if (!book) return;
-    setSelectedBook(book);
+    
+    // Quand un livre est sélectionné depuis l'autocomplétion, récupérons ses détails complets
+    try {
+      setLoading(true);
+      const bookDetails = await getBookDetails(book.id);
+      const completeBook = {
+        id: bookDetails.id,
+        title: bookDetails.volumeInfo.title,
+        authors: bookDetails.volumeInfo.authors || [],
+        description: bookDetails.volumeInfo.description,
+        thumbnail: bookDetails.volumeInfo.imageLinks?.thumbnail,
+        averageRating: bookDetails.volumeInfo.averageRating,
+        publisher: bookDetails.volumeInfo.publisher,
+        publishedDate: bookDetails.volumeInfo.publishedDate,
+      };
+      setSelectedBook(completeBook);
+    } catch (err) {
+      console.error("Erreur lors de la récupération des détails:", err);
+      setSelectedBook(book); // Fallback sur les données partielles
+    } finally {
+      setLoading(false);
+    }
+    
     setQuery(book.title);
     setShowResults(false);
   };
@@ -52,24 +74,22 @@ const BookSearch = ({ onBookSelect }) => {
     }
 
     if (value.trim().length >= 3) {
-      searchTimeout.current = setTimeout(async () => {
-        setLoading(true);
-        try {
-          const { results: searchResults, error: searchError } = await searchBooks(value);
-          if (searchError) {
-            setError(searchError);
-            setResults([]);
-          } else {
-            setResults(searchResults);
-            setShowResults(true);
-          }
-        } catch (err) {
-          setError('Erreur lors de la recherche');
+      // Nous n'avons pas besoin de setTimeout ici car getSearchSuggestions 
+      // intègre déjà un debouncing de 300ms
+      setLoading(true);
+      getSearchSuggestions(value)
+        .then(suggestions => {
+          setResults(suggestions);
+          setShowResults(suggestions.length > 0);
+        })
+        .catch(err => {
+          console.error("Erreur autocomplétion:", err);
+          setError('Erreur lors de la recherche de suggestions');
           setResults([]);
-        } finally {
+        })
+        .finally(() => {
           setLoading(false);
-        }
-      }, 500);
+        });
     } else {
       setResults([]);
       setShowResults(false);
